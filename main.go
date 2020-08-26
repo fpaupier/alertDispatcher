@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	_ "github.com/mattn/go-sqlite3"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"time"
@@ -52,9 +54,44 @@ func main() {
 				log.Fatalf("failed to scan row: %v\n", err)
 			}
 			fmt.Println(strconv.Itoa(id), ": ", createdAt, deviceType)
+			alert := &Alert{EventTime: createdAt, Probability: probability}
+			alert.CreatedBy = &Alert_Device{
+				Type:       deviceType,
+				Guid:       deviceId,
+				EnrolledOn: deviceDeployedOn,
+			}
+			alert.FaceDetectionModel = &Alert_Model{
+				Name:      faceModelName,
+				Guid:      faceModelGuid,
+				Threshold: faceModelThreshold,
+			}
+			alert.MaskClassifierModel = &Alert_Model{
+				Name:      maskModelName,
+				Guid:      maskModelGuid,
+				Threshold: maskModelThreshold,
+			}
+			alert.Location = &Alert_Location{Longitude: longitude, Latitude: latitude}
+			alert.Image = &Alert_Image{
+				Format: imageFormat,
+				Size: &Alert_Image_Size{
+					Width:  int32(imageWidth),
+					Height: int32(imageHeight),
+				},
+				Data: imageData,
+			}
+
+			out, err := proto.Marshal(alert)
+			if err != nil {
+				log.Fatalln("failed to encode alert:", err)
+			}
+
+			if err := ioutil.WriteFile("sampleProto"+strconv.Itoa(id), out, 0644); err != nil {
+				log.Fatalln("Failed to write address book:", err)
+			}
+
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(5 * time.Second)
 	}
 
 	//	Create protobuf
