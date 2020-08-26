@@ -90,12 +90,11 @@ func main() {
 			}
 
 		}
+		//	Send message to kafka queue
+
+		// Update row to indicate that alert is now `sent`
 
 		time.Sleep(5 * time.Second)
 	}
-
-	//	Create protobuf
-
-	//	Send message to kafka queue
 
 }
