@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	_ "github.com/mattn/go-sqlite3"
-	"io/ioutil"
 	"log"
 	"strconv"
 	"time"
@@ -87,9 +86,6 @@ func main() {
 			out, err := proto.Marshal(alert)
 			if err != nil {
 				log.Fatalln("failed to encode alert:", err)
-			}
-			if err := ioutil.WriteFile("sampleProto"+strconv.Itoa(id), out, 0644); err != nil {
-				log.Fatalln("Failed to write alert:", err)
 			}
 
 			rows.Close()
