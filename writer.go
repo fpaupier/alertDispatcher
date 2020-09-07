@@ -1,11 +1,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
+	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"log"
 	"os"
-	"time"
 )
 
 const (
@@ -14,12 +13,16 @@ const (
 	ccloudAPISecret  = ConfluentSecret
 )
 
-func Publish(msg []byte) {
+func publish(msg []byte) {
 	topic := "alert-topic"
-	createTopic(topic)
 	// Produce a new record to the topic...
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatalf("failed to get hostname: %v\n", err)
+	}
 	producer, err := kafka.NewProducer(&kafka.ConfigMap{
 		"bootstrap.servers": bootstrapServers,
+		"client.id":         hostname,
 		"sasl.mechanisms":   "PLAIN",
 		"security.protocol": "SASL_SSL",
 		"sasl.username":     ccloudAPIKey,
@@ -30,9 +33,8 @@ func Publish(msg []byte) {
 	}
 
 	err = producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &topic,
-			Partition: kafka.PartitionAny},
-		Value: msg},
+		TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+		Value:          msg},
 		nil)
 
 	// Wait for delivery report
@@ -50,59 +52,5 @@ func Publish(msg []byte) {
 	}
 
 	producer.Close()
-
-}
-
-func createTopic(topic string) {
-
-	adminClient, err := kafka.NewAdminClient(&kafka.ConfigMap{
-		"bootstrap.servers":       bootstrapServers,
-		"broker.version.fallback": "0.10.0.0",
-		"api.version.fallback.ms": 0,
-		"sasl.mechanisms":         "PLAIN",
-		"security.protocol":       "SASL_SSL",
-		"sasl.username":           ccloudAPIKey,
-		"sasl.password":           ccloudAPISecret})
-
-	if err != nil {
-		fmt.Printf("Failed to create Admin client: %s\n", err)
-		os.Exit(1)
-	}
-
-	// Contexts are used to abort or limit the amount of time
-	// the Admin call blocks waiting for a result.
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Create topics on cluster.
-	// Set Admin options to wait for the operation to finish (or at most 60s)
-	maxDuration, err := time.ParseDuration("60s")
-	if err != nil {
-		panic("time.ParseDuration(60s)")
-	}
-
-	results, err := adminClient.CreateTopics(ctx,
-		[]kafka.TopicSpecification{{
-			Topic:             topic,
-			NumPartitions:     1,
-			ReplicationFactor: 3}},
-		kafka.SetAdminOperationTimeout(maxDuration))
-
-	if err != nil {
-		fmt.Printf("Problem during the topic creation: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Check for specific topic errors
-	for _, result := range results {
-		if result.Error.Code() != kafka.ErrNoError &&
-			result.Error.Code() != kafka.ErrTopicAlreadyExists {
-			fmt.Printf("Topic creation failed for %s: %v",
-				result.Topic, result.Error.String())
-			os.Exit(1)
-		}
-	}
-
-	adminClient.Close()
 
 }

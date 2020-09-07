@@ -90,7 +90,7 @@ func main() {
 
 			rows.Close()
 			//	Send message to kafka queue
-			Publish(out)
+			publish(out)
 
 			// Update row to indicate that alert is now `sent`
 			stmt, err := database.Prepare("UPDATE alert SET sent = 1 WHERE id = ?")
