@@ -55,7 +55,7 @@ It takes a few seconds, and it's likely you get the following error message:
 error adding symbols: file format not recognized collect2: error: ld
 returned 1 exit status
 ```
-If this happens, it's because there is no compatible `librdkafka` build on for your ARM based Raspberry PI. No worries! 
+If this happens, it's because there is no compatible `librdkafka` build on for your [ARM](https://en.wikipedia.org/wiki/ARM_architecture) based Raspberry PI. No worries! 
  We can fix this by building `librdkafka` from source. On your Pi execute:
  ````shell script
 git clone https://github.com/edenhill/librdkafka.git
