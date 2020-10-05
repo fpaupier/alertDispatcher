@@ -12,7 +12,7 @@ import (
 
 const (
 	DriverName = "sqlite3"
-	DBPath     = "/Users/fpaupier/projects/pi-mask-detection/alert.db"
+	DBPath     = "/home/pi/pi-mask-detection/alert.db"
 )
 
 func main() {
