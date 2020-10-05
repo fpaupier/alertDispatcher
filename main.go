@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/golang/protobuf/proto"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
@@ -13,6 +12,7 @@ import (
 const (
 	DriverName = "sqlite3"
 	DBPath     = "/home/pi/pi-mask-detection/alert.db"
+	sleepTime  = 5 //  in seconds. Time between two scans of the local SQLite DB for new alert to publish.
 )
 
 func main() {
@@ -50,13 +50,14 @@ func main() {
 		}
 		//	Process all records not sent
 		var ids []int
+		sentAtLeastOneAlert := false
 		for rows.Next() {
 			ids = append(ids, id)
 			err = rows.Scan(&id, &createdAt, &deviceType, &deviceId, &deviceDeployedOn, &longitude, &latitude, &faceModelName, &faceModelGuid, &faceModelThreshold, &maskModelName, &maskModelGuid, &maskModelThreshold, &probability, &imageFormat, &imageWidth, &imageHeight, &imageData)
 			if err != nil {
 				log.Fatalf("failed to scan row: %v\n", err)
 			}
-			fmt.Println(strconv.Itoa(id), ": ", createdAt, deviceType)
+			log.Println("Publishing alert #", strconv.Itoa(id), ": created at ", createdAt)
 			alert := &Alert{EventTime: createdAt, Probability: probability}
 			alert.CreatedBy = &Alert_Device{
 				Type:       deviceType,
@@ -102,11 +103,14 @@ func main() {
 				log.Fatalf("failed to execute statement: %v\n", err)
 			}
 			stmt.Close()
+			sentAtLeastOneAlert = true
 		}
 		if err != nil {
 			log.Fatalf("failed to close rows: %v\n", err)
 		}
-		log.Println("finished one pass")
-		time.Sleep(5 * time.Second)
+		if sentAtLeastOneAlert == false {
+			log.Printf("no new alert to publish. Waiting %d seconds.\n", sleepTime)
+		}
+		time.Sleep(sleepTime * time.Second)
 	}
 }
