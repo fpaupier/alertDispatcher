@@ -37,6 +37,10 @@ func publish(msg []byte) {
 		Value:          msg},
 		nil)
 
+	if err != nil {
+		panic(fmt.Sprintf("failed to produce message : %b, got error: %s", msg, err))
+	}
+
 	// Wait for delivery report
 	e := <-producer.Events()
 
