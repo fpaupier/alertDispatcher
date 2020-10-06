@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	DriverName = "sqlite3"
-	DBPath     = "/home/pi/pi-mask-detection/alert.db"
-	sleepTime  = 5 //  in seconds. Time between two scans of the local SQLite DB for new alert to publish.
+	DriverName = "sqlite3"                             // use sqlite3 driver for db connection
+	DBPath     = "/home/pi/pi-mask-detection/alert.db" // to adjust to your device - could be loaded from config
+	sleepTime  = 5                                     //  in seconds. Time between two scans of the local SQLite DB for new alert to publish.
 )
 
 func main() {
