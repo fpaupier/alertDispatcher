@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/fpaupier/alertDispatcher)](https://goreportcard.com/report/github.com/fpaupier/alertDispatcher)
+
 # Alert Dispatcher
 
 This code runs on your IoT device and regularly polls the local storage to see if there are events
