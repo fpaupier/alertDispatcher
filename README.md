@@ -2,8 +2,8 @@
 
 # Alert Dispatcher
 
-This code runs on your IoT device and regularly polls the local storage to see if there are events
-to publish to the Kafka topics.
+This code runs on your Raspberry Pi. It regularly polls the local SQLite storage to see if there are events
+to publish to the Kafka topic.
 
 ## Credentials
 Rename the `credentials-template.go` file into `credentials.go` and make sure your version control system ignores it.
@@ -121,3 +121,14 @@ And _Voilà_, it should now work. Run the app with the command: `./alertDispatch
 
 _Note: If experienced C programmer or Go programmers familiar with the `unsafe` package could explain what happens in the lines 115 and 190 in more
 details; I'd be happy to have your insights._ 
+
+## Related projects
+
+This repository is part of a series of projects; this one focuses on message delivery. The others being:
+
+- [pi-mask-detection](https://github.com/fpaupier/pi-mask-detection) focuses on the actual detection of whether someone is 
+wearing their mask, as seen per the Pi.
+
+- [alertIngress](https://github.com/fpaupier/alertIngress) is a Go module designed to run on a server, consuming from a Kafka topic where edge devices pushes their events. Each event consumed by the alert Ingress are archived in PostgresSQL and pushed to a notification service.
+
+- [notifyMask](https://github.com/fpaupier/notifyMask) is a Go module designed to run on a server, sending email notification to a system administrator when an event occurs.
